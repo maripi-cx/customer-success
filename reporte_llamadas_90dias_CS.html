@@ -577,12 +577,14 @@ function buildVolumePanel(){
   const S_ID2="09d493cd-e2e5-4f9c-8464-ca6fa51f839c";
   const DAYS_FULL2=["","Lunes","Martes","Miércoles","Jueves","Viernes"];
   const color="#854F0B";
+  let html=`<div style="margin-bottom:14px">`;
+
   html+=`
-<div style="background:#fff3cd;border-left:3px solid #f5a623;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#555">
-  👉 Este análisis muestra <strong>cuándo el equipo llama más</strong>, no cuándo funciona mejor.<br>
-  Para ver efectividad, revisar el heatmap en la pestaña de equipo.
-</div>
-`;
+  <div style="background:#fff3cd;border-left:3px solid #f5a623;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#555">
+    👉 Este análisis muestra <strong>cuándo el equipo llama más</strong>, no cuándo funciona mejor.<br>
+    Para ver efectividad, revisar el heatmap en la pestaña de equipo.
+  </div>
+  `;
 
   /* Real data from HubSpot (full 90-day period, all disponible records) */
   /* vol[id] = {byDay:{1..5}, total, success_rate} */
