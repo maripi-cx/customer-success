@@ -348,7 +348,7 @@ function getRecos(a, color, name){
   }
   // Volume pattern
   const topDay=Object.entries(a.byDay).sort((a,b)=>b[1].t-a[1].t)[0];
-  recos.push({icon:"📊",title:"Distribución del volumen",body:`El mayor volumen de llamadas se concentra los <strong>${DF[parseInt(topDay[0])]}</strong> (${topDay[1].t} ll). Asegurarse de que ese día coincida con la ventana de alta tasa de éxito.`});
+  recos.push({icon:"📊",title:"Distribución del volumen",body:`El mayor volumen de llamadas se concentra los <strong>${DF[parseInt(topDay[0])]}</strong> (${topDay[1].t} ll en la muestra). Este dato no necesariamente coincide con los días de mayor efectividad, por lo que conviene revisar la pestaña de volumen para validar distribución real.`});
   // Morning vs afternoon
   let mornT=0,mornS=0,aftT=0,aftS=0;
   for(let h=8;h<13;h++){for(let d=1;d<=5;d++){const c=a.g[d][h]||{t:0,s:0};mornT+=c.t;mornS+=c.s;}}
@@ -367,13 +367,29 @@ function buildTeamPanel(){
   let html=`<div class="kpi-row">
     <div class="kpi"><div class="lbl">Total llamadas</div><div class="val">${a.T}</div><div class="sub">muestra representativa</div></div>
     <div class="kpi"><div class="lbl">Exitosas (C&G)</div><div class="val">${a.S}</div><div class="sub">${pct(a.rate)} tasa equipo</div></div>
-    <div class="kpi"><div class="lbl">Mejor día equipo</div><div class="val">${DF[a.bd]}</div><div class="sub">${pct(a.bdr)} de éxito</div></div>
+    <div class="kpi">   <div class="lbl">Mejor día (efectividad)</div>   <div class="val">${DF[a.bd]}</div>   <div class="sub">${pct(a.bdr)} de éxito (muestra)</div> </div>
+    ${(() => {
+  const volumeByDay = {};
+  Object.values(REAL_VOL).forEach(v=>{
+    for(let d=1;d<=5;d++){
+      volumeByDay[d]=(volumeByDay[d]||0)+v.byDay[d];
+    }
+  });
+  const topVolDay = Object.entries(volumeByDay).sort((a,b)=>b[1]-a[1])[0][0];
+  return `
+    <div class="kpi">
+      <div class="lbl">Día con más volumen</div>
+      <div class="val">${DF[topVolDay]}</div>
+      <div class="sub">datos reales</div>
+    </div>
+  `;
+})()}
     <div class="kpi"><div class="lbl">Mejor hora equipo</div><div class="val">${a.bh}:00 h</div><div class="sub">${pct(a.bhr)} de éxito</div></div>
   </div>`;
 
   /* ── INTRO SUMMARY ── */
   html+=`<div style="background:#f7f7f5;border-left:3px solid #4a4a4a;border-radius:0 8px 8px 0;padding:14px 18px;margin-bottom:22px;font-size:12px;line-height:1.75;color:#444">
-    <strong style="font-size:13px;color:#111;display:block;margin-bottom:6px">¿De qué se trata esto?</strong>
+    <strong style="font-size:13px;color:#111;display:block;margin-bottom:6px">Cómo leer este reporte</strong>  Este análisis separa dos cosas distintas:  <br><br>  <strong>• Efectividad (heatmap)</strong><br> Basado en una muestra de llamadas, muestra en qué días y horarios es más probable que el cliente conteste.  <br><br>  <strong>• Volumen (pestaña “Volumen”)</strong><br> Muestra cuántas llamadas se hicieron realmente usando datos completos de HubSpot.  <br><br>  👉 Por eso es normal ver diferencias como: <br> Martes = más llamadas   Jueves = mejor tasa    <br><br>  <strong>El foco no es solo llamar más, sino llamar mejor.</strong>
     Este reporte analiza una muestra de las llamadas que el equipo registró en HubSpot en los últimos 90 días para identificar en qué días y horarios hay más probabilidad de que un cliente conteste.
     Una llamada se considera exitosa cuando el cliente contestó y quedó grabada. Con eso armamos un mapa por día y hora para cada ejecutiva, para que el equipo pueda organizar mejor su agenda.
   </div>`;
@@ -561,6 +577,12 @@ function buildVolumePanel(){
   const S_ID2="09d493cd-e2e5-4f9c-8464-ca6fa51f839c";
   const DAYS_FULL2=["","Lunes","Martes","Miércoles","Jueves","Viernes"];
   const color="#854F0B";
+  html+=`
+<div style="background:#fff3cd;border-left:3px solid #f5a623;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#555">
+  👉 Este análisis muestra <strong>cuándo el equipo llama más</strong>, no cuándo funciona mejor.<br>
+  Para ver efectividad, revisar el heatmap en la pestaña de equipo.
+</div>
+`;
 
   /* Real data from HubSpot (full 90-day period, all disponible records) */
   /* vol[id] = {byDay:{1..5}, total, success_rate} */
@@ -592,8 +614,11 @@ function buildVolumePanel(){
   html+=`<div class="kpi-row">
     <div class="kpi"><div class="lbl">Total llamadas reales</div><div class="val">743</div><div class="sub">datos completos HubSpot</div></div>
     <div class="kpi"><div class="lbl">Ejecutiva más activa</div><div class="val" style="color:#378ADD">Javiera</div><div class="sub">2.710 total en período</div></div>
-    <div class="kpi"><div class="lbl">Día más activo equipo</div><div class="val">Martes</div><div class="sub">~24% del volumen semanal</div></div>
-    <div class="kpi"><div class="lbl">Día menos activo</div><div class="val">Viernes</div><div class="sub">~14% del volumen semanal</div></div>
+<div class="kpi">
+  <div class="lbl">Día con mayor volumen</div>
+  <div class="val">Martes</div>
+  <div class="sub">datos reales HubSpot</div>
+</div>    <div class="kpi"><div class="lbl">Día menos activo</div><div class="val">Viernes</div><div class="sub">~14% del volumen semanal</div></div>
   </div>`;
 
   /* Team distribution bar */
